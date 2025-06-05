@@ -4,9 +4,7 @@ import os
 
 
 def load_and_preprocess_image(image_path, target_size=(64, 64)):
-    """
-    Carga una imagen, la redimensiona y normaliza sus píxeles.
-    """
+
     try:
         img = cv2.imread(image_path)
         if img is None:
@@ -21,10 +19,7 @@ def load_and_preprocess_image(image_path, target_size=(64, 64)):
 
 
 def extract_color_features(image_array):
-    """
-    Extrae características de color simples (promedio de R, G, B) de una imagen.
-    Esta es una simplificación; en un proyecto real, se usarían técnicas más robustas.
-    """
+
     if image_array is None:
         return None
     # Calcular el promedio de los canales R, G, B
@@ -32,47 +27,8 @@ def extract_color_features(image_array):
     return avg_color
 
 
-def create_dummy_dataset(num_samples_per_class=20):
-    """
-    Crea un dataset simulado de características y etiquetas.
-    En un escenario real, esto cargaría tus imágenes de semáforo.
-    """
-    print("Creando dataset de prueba simulado...")
-    features = []
-    labels = []
-    class_mapping = {"red": 0, "yellow": 1, "green": 2}
-
-    # Simular características de color para cada clase
-    # Rojo: Más rojo
-    for _ in range(num_samples_per_class):
-        f = np.random.uniform(low=[0.7, 0.1, 0.1], high=[1.0, 0.3, 0.3])
-        features.append(f)
-        labels.append(class_mapping["red"])
-
-    # Amarillo: Más amarillo (rojo + verde)
-    for _ in range(num_samples_per_class):
-        f = np.random.uniform(low=[0.7, 0.7, 0.1], high=[1.0, 1.0, 0.3])
-        features.append(f)
-        labels.append(class_mapping["yellow"])
-
-    # Verde: Más verde
-    for _ in range(num_samples_per_class):
-        f = np.random.uniform(low=[0.1, 0.7, 0.1], high=[0.3, 1.0, 0.3])
-        features.append(f)
-        labels.append(class_mapping["green"])
-
-    features = np.array(features)
-    labels = np.array(labels)
-
-    print(f"Dataset simulado creado: {len(features)} muestras.")
-    return features, labels, class_mapping
-
-
 def load_real_dataset(data_dir, class_labels=["red", "yellow", "green"], target_size=(64, 64)):
-    """
-    Carga imágenes desde directorios específicos para cada clase y extrae características.
-    data_dir debería contener subdirectorios como 'red/', 'yellow/', 'green/'.
-    """
+
     all_features = []
     all_labels = []
     class_mapping = {label: i for i, label in enumerate(class_labels)}
@@ -100,18 +56,7 @@ def load_real_dataset(data_dir, class_labels=["red", "yellow", "green"], target_
 
 
 def process_raw_images_to_processed(raw_data_dir="data/raw", processed_data_dir="data/processed", target_size=(64, 64)):
-    """
-    Lee imágenes de la carpeta raw, las preprocesa y las clasifica en
-    las subcarpetas 'red', 'yellow', 'green' dentro de 'data/processed/'.
 
-    La clasificación se basa en una heurística simple de los colores RGB promedio
-    de la imagen preprocesada.
-
-    Args:
-        raw_data_dir (str): Directorio de las imágenes originales.
-        processed_data_dir (str): Directorio donde se guardarán las imágenes procesadas.
-        target_size (tuple): Tamaño al que se redimensionarán las imágenes.
-    """
     print(f"Iniciando procesamiento de imágenes de {raw_data_dir} a {processed_data_dir}...")
 
     # Asegúrate de que los directorios de salida existan
@@ -144,17 +89,7 @@ def process_raw_images_to_processed(raw_data_dir="data/raw", processed_data_dir=
             if features is not None:
                 r, g, b = features[0], features[1], features[2]  # Desempaquetar los promedios RGB
 
-                # --- Lógica de CLASIFICACIÓN BASADA EN UMBRALES DE COLOR ---
-                # ADVERTENCIA: Esta es una heurística simple. Los valores umbral
-                # pueden necesitar ajustes finos dependiendo de la iluminación,
-                # la saturación de los colores de tus semáforos, etc.
-                # También considera convertir a HSV para una mejor discriminación de color.
-
                 classified_label = "unclassified"
-
-                # Puedes ajustar estos umbrales para que se adapten a tus imágenes
-                # Por ejemplo, para rojo: el canal rojo es alto, los otros son bajos.
-                # Asegúrate de que la luz del semáforo sea el color dominante.
 
                 print(f"  RGB promedio para {img_name}: R={r:.2f}, G={g:.2f}, B={b:.2f}")
 
@@ -168,9 +103,6 @@ def process_raw_images_to_processed(raw_data_dir="data/raw", processed_data_dir=
                 elif r > 0.4 and g > 0.4 and b < 0.3 and (
                         abs(r - g) < 0.3):  # Rojo y verde altos, azul bajo, y son cercanos
                     classified_label = "yellow"
-
-                # Si una imagen de semáforo no cae en estas categorías, podría ser un problema
-                # con los umbrales o la calidad de la imagen.
 
                 if classified_label != "unclassified":
                     # Convertir el array normalizado de vuelta a 0-255 y a BGR para guardar con OpenCV
@@ -205,15 +137,7 @@ def process_raw_images_to_processed(raw_data_dir="data/raw", processed_data_dir=
 
 
 def start_camera_feed(prediction_callback=None, camera_index=0):
-    """
-    Inicia la captura de video de la cámara y procesa los frames.
 
-    Args:
-        prediction_callback (function, optional): Una función que toma un frame procesado
-                                                 y retorna una predicción. Por defecto None.
-        camera_index (int): El índice de la cámara a usar (0 para la predeterminada,
-                            puede ser 1, 2, etc., o la URL de DroidCam).
-    """
     # Si usas DroidCam, la URL típica es algo como 'http://192.168.1.XX:4747/video'
     # Descomenta y ajusta si es tu caso:
     # cam = cv2.VideoCapture('http://192.168.1.XX:4747/video')

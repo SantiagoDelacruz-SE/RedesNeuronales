@@ -22,16 +22,14 @@ from models.hopfield_network import HopfieldNetwork
 CLASS_LABELS = {0: "red", 1: "yellow", 2: "green"}  # Asegúrate que estos coincidan con tus nombres de carpeta
 # Diccionario para mapear etiquetas de texto a la señal final
 SIGNAL_MAP = {
-    "red": "ADVERTENCIA (¡ALTO!)",
-    "yellow": "PELIGRO (¡PRECAUCIÓN!)",
-    "green": "SEGURIDAD (¡PUEDE CRUZAR!)",
-    "desconocido": "ESTADO DESCONOCIDO"  # Para el caso de Hopfield o SOM si no se mapea bien
+    "red": "ADVERTENCIA (ALTO)",
+    "yellow": "PELIGRO (PRECAUCION)",
+    "green": "SEGURIDAD (PUEDE CRUZAR)",
+    "desconocido": "Estado desconocido"
 }
 
 
 def get_signal_message(predicted_label):
-    """Mapea la etiqueta predicha a la señal de advertencia/peligro/seguridad."""
-    # Si predicted_label ya es el string "red", "yellow", "green" (como en SOM/Hopfield)
     if predicted_label in SIGNAL_MAP:
         return SIGNAL_MAP[predicted_label]
     # Si predicted_label es un índice (como en MLP/RBF), mapearlo primero a nombre
@@ -43,11 +41,7 @@ def get_signal_message(predicted_label):
 
 
 def run_mlp_prediction(model, class_names, scaler=None):
-    """
-    Crea una función de callback para predicciones con el modelo MLP.
-    """
-    # Invertir el mapeo de class_names para obtener la etiqueta de texto a partir del índice numérico
-    # class_names es una lista como ["red", "yellow", "green"] donde el índice es la clase
+
     class_index_to_name = {i: name for i, name in enumerate(class_names)}
 
     def predict_frame(frame_features):
@@ -226,14 +220,14 @@ def main():
     # SOM
     print("\n##### ENTRENANDO SOM #####")
     # SOM usa MinMaxScaler para normalizar los datos a un rango [0, 1]
-    scaler_som = MinMaxScaler()
-    X_scaled_som_train = scaler_som.fit_transform(X_train)
-    X_scaled_som_all = scaler_som.transform(X)  # Para el mapeo de neuronas
+    # scaler_som = MinMaxScaler()
+    # X_scaled_som_train = scaler_som.fit_transform(X_train)
+    # X_scaled_som_all = scaler_som.transform(X)  # Para el mapeo de neuronas
 
-    som_model = SOMTrafficLightClassifier(x=10, y=10, input_len=X_scaled_som_train.shape[1], sigma=0.5,
-                                          learning_rate=0.5)
-    som_model.train(X_scaled_som_train, num_iteration=20000)
-    som_model.classify_map(X_scaled_som_all, y, class_names)
+    # som_model = SOMTrafficLightClassifier(x=10, y=10, input_len=X_scaled_som_train.shape[1], sigma=0.5,
+               #                           learning_rate=0.5)
+    # som_model.train(X_scaled_som_train, num_iteration=20000)
+    # som_model.classify_map(X_scaled_som_all, y, class_names)
     # Visualizar el mapa SOM (descomentar si quieres ver la ventana emergente)
     # som_model.visualize_map(X_scaled_som_all, y, class_names)
 
@@ -243,7 +237,7 @@ def main():
     scaler_rbf = StandardScaler()
     X_scaled_rbf_train = scaler_rbf.fit_transform(X_train)
     X_scaled_rbf_test = scaler_rbf.transform(X_test)
-    rbf_net = RBFNetwork(n_rbf_neurons=30, gamma=0.5)
+    rbf_net = RBFNetwork(n_rbf_neurons=10, gamma=0.5)
     rbf_net.train(X_scaled_rbf_train, y_train)
     rbf_net.evaluate(X_scaled_rbf_test, y_test, class_names)
 
@@ -269,13 +263,8 @@ def main():
     # --- 3. Selección del Modelo a Usar en Tiempo Real y Captura de Cámara ---
     print("\n##### SELECCIÓN DEL MODELO PARA LA CÁMARA #####")
 
-    # Puedes elegir qué modelo quieres probar en tiempo real.
-    # Descomenta la línea del modelo que quieras usar y comenta las otras.
-    # Por defecto, MLP está activado para empezar.
-
     # --- USAR MLP EN LA CÁMARA ---
     print("\n¡Iniciando cámara con predicciones de MLP! Presiona ESC para salir.")
-    # El scaler_mlp_for_camera DEBE ser el mismo scaler entrenado con X_train para MLP.
     camera_prediction_func = run_mlp_prediction(mlp_classifier.model, class_names, scaler=scaler_mlp)
     start_camera_feed(prediction_callback=camera_prediction_func, camera_index=0)
 

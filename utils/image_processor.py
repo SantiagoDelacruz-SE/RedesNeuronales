@@ -159,13 +159,13 @@ def process_raw_images_to_processed(raw_data_dir="data/raw", processed_data_dir=
                 print(f"  RGB promedio para {img_name}: R={r:.2f}, G={g:.2f}, B={b:.2f}")
 
                 # Semáforo Rojo
-                if r > g * 1 and r > b * 1 and r > 0.2:  # Rojo significativamente más alto que verde y azul
+                if r > g * 1.2 and r > b * 1.2 and r > 0.4:  # Rojo significativamente más alto que verde y azul
                     classified_label = "red"
                 # Semáforo Verde
-                elif g > r * 1 and g > b * 1 and g > 0.2:  # Verde significativamente más alto que rojo y azul
+                elif g > r * 1 and g > b * 1 and g > 0.4:  # Verde significativamente más alto que rojo y azul
                     classified_label = "green"
                 # Semáforo Amarillo (una mezcla de rojo y verde)
-                elif r > 0.2 and g > 0.2 and b < 0.3 and (
+                elif r > 0.4 and g > 0.4 and b < 0.3 and (
                         abs(r - g) < 0.3):  # Rojo y verde altos, azul bajo, y son cercanos
                     classified_label = "yellow"
 
